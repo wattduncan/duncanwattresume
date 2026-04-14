@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cup Trivia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a6b1a, #000000);
+            background-attachment: fixed;
+            font-family: 'Georgia', serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-family: 'Arial Black', sans-serif;
+            color: #f5c518;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+        }
+
+        .subtitle {
+            color: #cccccc;
+            font-style: italic;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .quiz-container {
+            background-color: rgba(0,0,0,0.6);
+            border-radius: 10px;
+            border-left: 5px solid #f5c518;
+            padding: 2rem;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .question-number {
+            font-family: 'Arial', sans-serif;
+            color: #f5c518;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .option-btn {
+            background-color: rgba(255,255,255,0.1);
+            border: 2px solid #f5c518;
+            color: #ffffff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: rgba(245, 197, 24, 0.2);
+        }
+
+        .option-btn.correct {
+            background-color: rgba(25, 135, 84, 0.6);
+            border-color: #19875 4;
+        }
+
+        .option-btn.wrong {
+            background-color: rgba(220, 53, 69, 0.6);
+            border-color: #dc3545;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .feedback {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: rgba(25, 135, 84, 0.3);
+            border: 1px solid #198754;
+            color: #90ee90;
+        }
+
+        .feedback.wrong {
+            background-color: rgba(220, 53, 69, 0.3);
+            border: 1px solid #dc3545;
+            color: #ffaaaa;
+        }
+
+        .next-btn {
+            background-color: #f5c518;
+            color: #000000;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .next-btn:hover {
+            background-color: #ffd700;
+        }
+
+        .score-container {
+            text-align: center;
+            display: none;
+        }
+
+        .score-container h2 {
+            font-family: 'Arial Black', sans-serif;
+            color: #f5c518;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .score-container p {
+            font-size: 1.2rem;
+            color: #dddddd;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #f5c518;
+            display: block;
+            margin: 1rem 0;
+        }
+
+        .restart-btn {
+            background-color: #f5c518;
+            color: #000000;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 1rem;
+        }
+
+        .restart-btn:hover {
+            background-color: #ffd700;
+        }
+
+        .back-link {
+            margin-top: 2rem;
+            color: #f5c518;
+            text-decoration: none;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar-container {
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: #f5c518;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>⚽ World Cup Trivia</h1>
+    <p class="subtitle">How well do you know the beautiful game?</p>
+
+    <div class="quiz-container">
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <!-- Question Area -->
+        <div id="questionArea">
+            <div class="question-number" id="questionNumber">Question 1 of 10</div>
+            <div class="question-text" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+        </div>
+
+        <!-- Score Screen -->
+        <div class="score-container" id="scoreContainer">
+            <h2>Quiz Complete! 🏆</h2>
+            <p>You scored:</p>
+            <span class="score-number" id="finalScore"></span>
+            <p id="scoreMessage"></p>
+            <button class="restart-btn" onclick="restartQuiz()">Play Again</button>
+        </div>
+
+    </div>
+
+    <a class="back-link" href="fromscratch.html">← Back to World Cup Page</a>
+
+    <script>
+        const questions = [
+            {
+    question: "Which of the following players did NOT score a goal in a World Cup final?",
+    options: ["Zinedine Zidane", "Pelé", "Ronaldo (Brazil)", "Luka Modric"],
+    correct: 3,
+    explanation: "Luka Modric never scored in a World Cup final. Croatia reached the final in 2018 but lost to France. Zidane scored in 1998, Pelé scored in 1958, and Ronaldo scored in 2002."
+},
+            {
+                question: "Which country has won the most FIFA World Cups?",
+                options: ["Germany", "Argentina", "Brazil", "Italy"],
+                correct: 2,
+                explanation: "Brazil has won the World Cup 5 times (1958, 1962, 1970, 1994, 2002) — more than any other nation."
+            },
+            {
+                question: "Who scored the famous 'Hand of God' goal at the 1986 World Cup?",
+                options: ["Pelé", "Diego Maradona", "Ronaldo", "Zinedine Zidane"],
+                correct: 1,
+                explanation: "Diego Maradona scored the infamous 'Hand of God' goal against England in the 1986 quarter-finals, using his hand to punch the ball into the net."
+            },
+            {
+                question: "In what year was the first FIFA World Cup held?",
+                options: ["1926", "1930", "1934", "1938"],
+                correct: 1,
+                explanation: "The first FIFA World Cup was held in 1930 in Uruguay, who also won the tournament."
+            },
+            {
+                question: "Who is the all-time leading scorer in World Cup history?",
+                options: ["Ronaldo (Brazil)", "Pelé", "Miroslav Klose", "Just Fontaine"],
+                correct: 2,
+                explanation: "Miroslav Klose of Germany holds the record with 16 goals across four World Cups (2002, 2006, 2010, 2014)."
+            },
+            {
+                question: "Which country hosted the 2022 FIFA World Cup?",
+                options: ["Saudi Arabia", "UAE", "Qatar", "Bahrain"],
+                correct: 2,
+                explanation: "Qatar hosted the 2022 FIFA World Cup — the first World Cup ever held in the Middle East."
+            },
+            {
+                question: "Who won the 2022 FIFA World Cup?",
+                options: ["France", "Brazil", "Argentina", "Croatia"],
+                correct: 2,
+                explanation: "Argentina defeated France in the 2022 final on penalty shootout after a thrilling 3-3 draw. It was Argentina's third World Cup title."
+            },
+            {
+                question: "How many teams will compete in the 2026 FIFA World Cup?",
+                options: ["32", "36", "48", "64"],
+                correct: 2,
+                explanation: "The 2026 World Cup, hosted by the USA, Canada, and Mexico, will feature 48 teams — up from the previous format of 32."
+            },
+            {
+                question: "Which player scored the most goals in a single World Cup tournament?",
+                options: ["Gerd Müller", "Just Fontaine", "Ronaldo", "Sandor Kocsis"],
+                correct: 1,
+                explanation: "Just Fontaine of France scored 13 goals at the 1958 World Cup — still the record for most goals in a single tournament."
+            },
+            {
+            question: "Which goalkeeper famously saved two penalties in the 2022 World Cup final shootout to help Argentina win?",
+            options: ["Alisson Becker", "Emiliano Martínez", "Hugo Lloris", "Ederson"],
+            correct: 1,
+            explanation: "Emiliano Martínez saved two penalties in the shootout against France, helping Argentina claim their third World Cup title. He won the Golden Glove award for best goalkeeper of the tournament."
+        }
+    ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('questionText').textContent = q.question;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+
+            const progress = (currentQuestion / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            answered = false;
+        }
+
+        function selectAnswer(index) {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentQuestion];
+            const buttons = document.querySelectorAll('.option-btn');
+            const feedback = document.getElementById('feedback');
+
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (index === q.correct) {
+                buttons[index].classList.add('correct');
+                feedback.textContent = '✅ Correct! ' + q.explanation;
+                feedback.className = 'feedback correct';
+                score++;
+            } else {
+                buttons[index].classList.add('wrong');
+                buttons[q.correct].classList.add('correct');
+                feedback.textContent = '❌ Not quite. ' + q.explanation;
+                feedback.className = 'feedback wrong';
+            }
+
+            feedback.style.display = 'block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+
+            if (currentQuestion === questions.length - 1) {
+                document.getElementById('nextBtn').textContent = 'See My Score';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            document.getElementById('questionArea').style.display = 'none';
+            document.getElementById('scoreContainer').style.display = 'block';
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('finalScore').textContent = score + ' / ' + questions.length;
+
+            let message = '';
+            if (score === questions.length) {
+                message = '🏆 Perfect score! You are a World Cup legend!';
+            } else if (score >= 8) {
+                message = '⭐ Excellent! You really know your World Cup history!';
+            } else if (score >= 5) {
+                message = '👍 Not bad! Brush up on your World Cup facts and try again!';
+            } else {
+                message = '📚 Time to study up! The World Cup has a rich history worth knowing.';
+            }
+            document.getElementById('scoreMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            document.getElementById('questionArea').style.display = 'block';
+            document.getElementById('scoreContainer').style.display = 'none';
+            loadQuestion();
+        }
+
+        // Start the quiz
+        loadQuestion();
+    </script>
+
+</body>
+</html>
